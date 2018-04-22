@@ -1,0 +1,5 @@
+- Erro no socket;
+- Erro no ObjectoutputStream;
+
+-Ambos se deram, pois o socket do cliente nao conseguiu
+se conectar
