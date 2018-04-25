@@ -21,7 +21,7 @@ public class TratadorDeConexao extends Thread
     {
         while (!fim)
         {
-          /* ListaOrdenada<String> nicksAtuais = this.salas.getNicks();
+      	   /*ListaOrdenada<String> nicksAtuais = this.salas.getNicks();
            ListaOrdenada<String> entrou = nicksAtuais.menos(this.nick);
            ListaOrdenada<String> saiu   = this.nick.menos(nicksAtuais);
            // para cada string s da lista entrou

@@ -32,5 +32,29 @@ public class Texto implements Serializable{
 	}
 	//getters and setters
 	
+	public boolean equals(Object obj)
+	{
+		if(obj == null)
+			return false;
+		
+		if(this == obj)
+			return true;
+		
+		if(!(obj instanceof Texto))
+			return false;
+		
+		Texto txt = (Texto)obj;
+		
+		if(!(this.nickRemetente == txt.nickRemetente))
+			return false;
+		
+		if(!(this.nickDestinatario == txt.nickDestinatario))
+			return false;
+		
+		if(!(this.texto == txt.texto))
+			return false;
+		
+		return true;		
+	}
 	
 }

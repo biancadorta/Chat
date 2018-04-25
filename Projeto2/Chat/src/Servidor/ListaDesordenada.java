@@ -66,14 +66,30 @@ public class ListaDesordenada <X>
     protected No ultimo;
     protected int quantosNos;
 
+    	
     public ListaDesordenada ()
     {
         this.prim = null;
         this.ultimo = null;
         //this.anterior = null;
         this.quantosNos = 0;
+    }  
+    
+    public X getInfo(int i)
+    {
+    	//percorro a lista e ir retornando de acordo com o parametro
+    	No aux = this.prim;
+    	
+    	for(int j = 0; j <= i; j++)
+    	{
+    		aux = aux.getProx();
+    	}
+    	
+    	//ao sair do for o aux esta apontando para um certo No, e assim
+    	// vou ir retornando o info dele
+    	return aux.getInfo();    	    	
     }
-
+    
     protected X meuCloneDeX (X x)
     {
         X ret = null;
@@ -117,13 +133,13 @@ public class ListaDesordenada <X>
         quantosNos++;
     }
 
-    public X getInfoPrim() throws Exception
+   /* public X getInfoPrim() throws Exception
     {
         if(this.prim == null)
             throw new Exception("Primeiro aponta para null");
 
         return(X)this.prim.getInfo();
-    }
+    }*/
 
     public void insiraNoFim (X x) throws Exception
     {

@@ -1,0 +1,36 @@
+- fazer uma classe que tem nickremetente, destinatario,
+e a mensagem
+
+- A partir de uma instancia dessa classe, atribui os
+valores a partir a partir do JanelaCliente
+
+- Essa classe terá que estar tanto no Cliente como no 
+servidor
+
+- Assim ao enviar, enviaremos um objeto e lá no servidor
+desmembraremos a partir dessa classe e seus atributos
+
+Salas
+============
+- Para estabelecer as salas, ler da classe Salas e colocar
+no comboBox
+
+- Ao escolher certa sala, carregar qual usuarios se encontram
+nela
+
+-Colocar o nick do usuario na Sala que ele escolheu
+
+Servidor - mensagens
+=====================
+
+-Para as mensagens devo utilizar a classe TratadorDeConexao?
+
+
+Fazer
+==========
+
+-1) Usuario
+-2) Sala
+-3) Salas
+-4) TratadorDeConexao 
+

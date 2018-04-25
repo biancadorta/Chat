@@ -3,6 +3,8 @@ package Janela.Servidor;
 import java.net.*;
 import Janela.Servidor.*;
 import Servidor.Texto;
+import Servidor.TratadorDeConexao;
+import Servidor.Salas;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -43,15 +45,17 @@ public class JanelaServidor extends JFrame {
 			}
 		});
 		try {
-			servidor = new ServerSocket(12345);
-			connection = servidor.accept();
-			ois = new ObjectInputStream(new FileInputStream("D:\\Testando.txt"));
-			Texto txt = (Texto) ois.readObject();
-			while(txt.Mensagem().equals("Fimm")) //nao tem equals na quase pode dar erro aqui
+			servidor = new ServerSocket(12345);	
+			Salas salas = new Salas();
+			for(;;) //nao tem equals na quase pode dar erro aqui
 			{
-				txtMensagem.setText(txt.Mensagem());
+				connection = servidor.accept();
+				ois = new ObjectInputStream(connection.getInputStream());
+				Texto txt = (Texto) ois.readObject();
+				new TratadorDeConexao(salas,connection);
+				txtMensagem.setText(txt.remetente()+ ": "+txt.Mensagem());
 			}
-			txtMensagem.setText("Remetente:"+txt.remetente()+ "/n Msg:"+txt.Mensagem());
+
 		}
 		catch(Exception erro)
 		{

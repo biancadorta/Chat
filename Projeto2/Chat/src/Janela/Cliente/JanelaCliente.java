@@ -68,11 +68,11 @@ public class JanelaCliente extends javax.swing.JFrame{
 	public JanelaCliente() {
 		 initialize();	
 		 try {
-			conexao = new Socket ("192.168.15.11", 12345);
+			conexao = new Socket ("177.220.18.12", 12345);
 			usu = null;
 			usu = new Usuario(cbSalas.getSelectedItem().toString(),conexao);
-			usu.setNick("Bianquinhaaa");
-			txtMensagem.setText("Heyy, isto e um teste s2");						
+			usu.setNick("Bianquinha");
+			txtMensagem.setText("Hey, isto e um teste s2");						
 		}
 		catch(Exception erro)
 		{
@@ -133,11 +133,12 @@ public class JanelaCliente extends javax.swing.JFrame{
 		btnEnviar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					text = new Texto("Biancaaa", cbxRemetentes.getSelectedItem().toString(), txtMensagem.getText().trim().toString());
+					//if(chkTodos == true)						
+					/*text = new Texto("Bianca", cbxRemetentes.getSelectedItem().toString(), txtMensagem.getText().trim().toString());
 					ops = null;
-					ops = new ObjectOutputStream(new FileOutputStream("D:\\testando.txt"));
+					ops = new ObjectOutputStream(conexao.getOutputStream());
 					ops.writeObject(text);					
-					lblMensagem.setText("Foiiii");				
+					//lblMensagem.setText("Foi");*/				
 				}
 				catch(Exception erro)
 				{
