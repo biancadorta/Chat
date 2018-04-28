@@ -53,7 +53,7 @@ public class JanelaServidor extends JFrame {
 				ois = new ObjectInputStream(connection.getInputStream());
 				Texto txt = (Texto) ois.readObject();
 				new TratadorDeConexao(salas,connection);
-				txtMensagem.setText(txt.remetente()+ ": "+txt.Mensagem());
+				//txtMensagem.setText(txt.remetente()+ ": "+txt.Mensagem());
 			}
 
 		}

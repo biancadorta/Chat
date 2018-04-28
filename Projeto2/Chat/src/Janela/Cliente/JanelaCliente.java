@@ -33,7 +33,6 @@ public class JanelaCliente extends javax.swing.JFrame{
 
 	private JFrame frame;
 	private JLabel lblMensagem;
-	private JComboBox cbSalas;
 	private static JTextField textField;
 	static Socket conexao;
 	private JTextField txtMensagem ;
@@ -68,11 +67,7 @@ public class JanelaCliente extends javax.swing.JFrame{
 	public JanelaCliente() {
 		 initialize();	
 		 try {
-			conexao = new Socket ("177.220.18.12", 12345);
-			usu = null;
-			usu = new Usuario(cbSalas.getSelectedItem().toString(),conexao);
-			usu.setNick("Bianquinha");
-			txtMensagem.setText("Hey, isto e um teste s2");						
+			conexao = new Socket ("177.220.18.12", 12345);				 		
 		}
 		catch(Exception erro)
 		{
@@ -101,6 +96,13 @@ public class JanelaCliente extends javax.swing.JFrame{
 		panel.add(textField);
 		textField.setColumns(10);
 		
+		Label label = new Label("Salas:");
+		panel.add(label);
+		
+		JComboBox comboBox = new JComboBox();
+		comboBox.setMaximumRowCount(9);
+		panel.add(comboBox);
+		
 		JPanel panel_1 = new JPanel();
 		frame.getContentPane().add(panel_1, BorderLayout.SOUTH);
 		panel_1.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
@@ -111,15 +113,6 @@ public class JanelaCliente extends javax.swing.JFrame{
 		txtMensagem = new JTextField();
 		panel_1.add(txtMensagem);
 		txtMensagem.setColumns(10);
-		
-		Label lbSalas = new Label("Salas:");
-		panel_1.add(lbSalas);
-		
-		cbSalas = new JComboBox();		
-		
-		cbSalas.setModel(new DefaultComboBoxModel(new String[] {"Dinalva", "Claudio", "Lapa", "Lina ", "Lasi", ""}));
-		cbSalas.setMaximumRowCount(9);
-		panel_1.add(cbSalas);
 		
 		JLabel lblRemetente = new JLabel("Remetente:");
 		panel_1.add(lblRemetente);
@@ -168,16 +161,6 @@ public class JanelaCliente extends javax.swing.JFrame{
 		txtArea.setBackground(SystemColor.window);
 		txtArea.setEnabled(false);
 		panel_2.add(txtArea, BorderLayout.CENTER);
-		
-		cbSalas.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent arg0) {
-				lblMensagem.setText(cbSalas.getSelectedItem().toString());
-				if(cbSalas.getSelectedItem().equals("Dinalva"))
-				{
-					cbxRemetentes.addItem("Teste");
-				}
-			}
-		});
 		
 	}
 }

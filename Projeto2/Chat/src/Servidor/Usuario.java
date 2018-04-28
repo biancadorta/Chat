@@ -24,27 +24,43 @@ public class Usuario
     	this.receptor    = new ObjectInputStream(this.conexao.getInputStream());
     	this.transmissor = new ObjectOutputStream(this.conexao.getOutputStream());
     	
-    	this.transmissor.writeObject(nomSl);
-    	this.nomeSala = (String)receptor.readObject();
-    	this.nick     = (String)receptor.readObject();
-    	   	
     	// interage atraves deles com o usuario para enviar a lista de
         // salas e obter a sala onde o usuario quer entrar, bem como o
         // seu nick, inicializando this.nomeSala e this.nick   	
+    	
+    	//ACHOOO QUE ISSO VAI DAR ERROOOOOOOOOOO
+    	this.transmissor.writeObject(new Texto("Lista_De_Salas",nomSl));
+    	
+    	Texto txt = (Texto)this.receptor.readObject();
+    	
+    	if(txt.getTipo().equals("Lista_De_Salas")) {
+    		this.nick     = (String)txt.getComplemento1();    
+    		this.nomeSala = (String)txt.getComplemento2();
+    	}
+    	else
+    	{
+    		System.out.println("OIEEEEEEEEE");
+    	}
+    	    	
+    	/*this.transmissor.writeObject(nomSl);
+    	this.nomeSala = (String)receptor.readObject();
+    	this.nick     = (String)receptor.readObject();*/  	  	    	
     }   
     
     // metodos para desconectar
 
     // recebe do usuario, usando this.receptor    
-    public Object recebe () throws ClassNotFoundException, IOException {
+     public Object recebe () throws ClassNotFoundException, IOException {
     	return (Object)this.receptor.readObject();
     }
 
     // envia para o usuario, usando this.transmissor
     public void   envia  (Serializable s) throws Exception {  //teria que enviar um Texto
     	//Colocar Serializable para nao dar excecao, teoricamente seria como Object
+    	if(s == null)
+    		throw new Exception("parametro nao foi fornecido");
     	if(s.equals(""))
-    		throw new Exception("String invalida");
+    		throw new Exception("String invalida");    	
     	
     	this.transmissor.writeObject(s);
     }
