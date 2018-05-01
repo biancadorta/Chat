@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -25,23 +26,27 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JOptionPane;
 
-import Servidor.Usuario;
-import Servidor.Texto;
+import Cliente.Texto;
+import javax.swing.SwingConstants;
 
 public class JanelaCliente extends javax.swing.JFrame{
 
 	private JFrame frame;
 	private JLabel lblMensagem;
-	private static JTextField textField;
+	private JComboBox cbxSalas;
+	private static JTextField txtNick;
 	static Socket conexao;
 	private JTextField txtMensagem ;
-	private Usuario usu;
-	private ObjectOutputStream ops;
-	private ObjectInputStream ois;
+	private ObjectOutputStream saida_dados;
+	private ObjectInputStream entrada_dados;
 	private Texto text;
-	private JComboBox cbxRemetentes;
-	private JTextArea txtArea;
+	private JComboBox cbxDestinatarios;
+	private JTextArea txaMensagens;
+	private JTextField txtIp;
+	private JTextField txtPorta;
+	private String recebido[][];
 	/**
 	 * Launch the application.
 	 */
@@ -66,13 +71,7 @@ public class JanelaCliente extends javax.swing.JFrame{
 	 */
 	public JanelaCliente() {
 		 initialize();	
-		 try {
-			conexao = new Socket ("177.220.18.12", 12345);				 		
-		}
-		catch(Exception erro)
-		{
-			textField.setText("Erro:"+erro.getMessage());
-		}
+		 
 		 
 	}
 
@@ -82,26 +81,34 @@ public class JanelaCliente extends javax.swing.JFrame{
 	private void initialize() {
 		frame = new JFrame();
 		frame.setResizable(false);
-		frame.setBounds(100, 100, 601, 369);
+		frame.setBounds(100, 100, 675, 369);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel = new JPanel();
 		frame.getContentPane().add(panel, BorderLayout.NORTH);
 		
-		JLabel lblNick = new JLabel("Qual sera seu nick s2?");
+		JLabel lblNewLabel = new JLabel("Ip servidor");
+		panel.add(lblNewLabel);
+		
+		txtIp = new JTextField();
+		panel.add(txtIp);
+		txtIp.setColumns(10);
+		
+		JLabel lblNewLabel_1 = new JLabel("Porta servidor");
+		panel.add(lblNewLabel_1);
+		
+		txtPorta = new JTextField();
+		panel.add(txtPorta);
+		txtPorta.setColumns(10);
+		
+		JLabel lblNick = new JLabel("Nick");
 		panel.add(lblNick);
 		
-		textField = new JTextField();
-		panel.add(textField);
-		textField.setColumns(10);
-		
-		Label label = new Label("Salas:");
-		panel.add(label);
-		
-		JComboBox comboBox = new JComboBox();
-		comboBox.setMaximumRowCount(9);
-		panel.add(comboBox);
+		txtNick = new JTextField();
+		txtNick.setHorizontalAlignment(SwingConstants.LEFT);
+		panel.add(txtNick);
+		txtNick.setColumns(10);
 		
 		JPanel panel_1 = new JPanel();
 		frame.getContentPane().add(panel_1, BorderLayout.SOUTH);
@@ -111,27 +118,48 @@ public class JanelaCliente extends javax.swing.JFrame{
 		panel_1.add(lblMensagem);
 		
 		txtMensagem = new JTextField();
+		txtMensagem.setEnabled(false);
 		panel_1.add(txtMensagem);
 		txtMensagem.setColumns(10);
 		
-		JLabel lblRemetente = new JLabel("Remetente:");
+		Label lbSalas = new Label("Sala");
+		panel_1.add(lbSalas);
+		
+		cbxSalas = new JComboBox();
+		cbxSalas.setEnabled(false);
+		cbxSalas.setMaximumRowCount(9);
+		panel_1.add(cbxSalas);
+		
+		JLabel lblRemetente = new JLabel("Destinat\u00E1rio");
 		panel_1.add(lblRemetente);
 		
-		cbxRemetentes = new JComboBox();
-		cbxRemetentes.setModel(new DefaultComboBoxModel(new String[] {"Bianca", "Elisa", "Emannuel", "Rojas", "Miguel", "Prato", "Tales"}));
-		cbxRemetentes.setMaximumRowCount(9);
-		panel_1.add(cbxRemetentes);
+		cbxDestinatarios = new JComboBox();
+		cbxDestinatarios.setEnabled(false);
+		cbxDestinatarios.setMaximumRowCount(9);
+		panel_1.add(cbxDestinatarios);
 		
 		JButton btnEnviar = new JButton("Enviar");
+		btnEnviar.setEnabled(false);
 		btnEnviar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				try {
+				try 
+				{
 					//if(chkTodos == true)						
 					/*text = new Texto("Bianca", cbxRemetentes.getSelectedItem().toString(), txtMensagem.getText().trim().toString());
 					ops = null;
 					ops = new ObjectOutputStream(conexao.getOutputStream());
 					ops.writeObject(text);					
-					//lblMensagem.setText("Foi");*/				
+					//lblMensagem.setText("Foi");*/
+					
+					saida_dados = new ObjectOutputStream(conexao.getOutputStream());
+					//mando pro servidor a mensagem
+					saida_dados.flush();
+					Texto mensagem_enviada = new Texto("mensagem",cbxDestinatarios.getSelectedItem().toString(),txtMensagem.getText(),null);
+					saida_dados.writeObject(mensagem_enviada);
+					saida_dados.flush();
+					saida_dados.close();
+					
+					txaMensagens.append("eu para "+ cbxDestinatarios.getSelectedItem().toString() + " : " + txtMensagem.getText());					
 				}
 				catch(Exception erro)
 				{
@@ -157,10 +185,150 @@ public class JanelaCliente extends javax.swing.JFrame{
 		panel_3.add(panel_4, BorderLayout.CENTER);
 		panel_4.setLayout(new BorderLayout(0, 0));
 		
-		txtArea = new JTextArea();
-		txtArea.setBackground(SystemColor.window);
-		txtArea.setEnabled(false);
-		panel_2.add(txtArea, BorderLayout.CENTER);
+		txaMensagens = new JTextArea();
+		txaMensagens.setBackground(SystemColor.window);
+		txaMensagens.setEnabled(false);
+		panel_2.add(txaMensagens, BorderLayout.CENTER);
+		
+		JButton btnConectar = new JButton("Conectar");
+		panel_2.add(btnConectar, BorderLayout.NORTH);
+		btnConectar.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent arg0) 
+			{							
+				if (txtIp.getText().equals("") || txtPorta.getText().equals("") || txtNick.getText().equals(""))
+				{
+					JOptionPane.showMessageDialog(null, "Preencha todos os campos", "Alerta", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				
+				txaMensagens.setText("");//limpa as mensagens caso o usuário vá entrar em outro servidor
+				
+				try 
+				{
+					conexao = new Socket (txtIp.getText(), Integer.parseInt(txtPorta.getText()));
+					txaMensagens.setText("Conectado. Selecione uma sala");
+					cbxSalas.removeAllItems();
+										
+					saida_dados = new ObjectOutputStream(conexao.getOutputStream());
+					entrada_dados = new ObjectInputStream(conexao.getInputStream());
+					
+					//mando pro servidor o nome do usuário
+					saida_dados.flush();
+					Texto info_usuario = new Texto("informação",txtNick.getText());
+					saida_dados.writeObject(info_usuario);
+					saida_dados.flush();
+					saida_dados.close();
+					
+					
+					//recebe a lista de salas e destinatarios na sala em uma matriz
+					// o tipo do objeto texto será "lista_salas_destinatarios"
+					// o complemento1 será uma matriz de strings
+					//exemplo:
+					/* 
+					 *   dinalva celio sampaio jose zuzinha
+					 *   claudio chico sergiao luca bianca
+					 *   lapa
+					 *   lina    fulano ciclano 
+					 */
+					// o complemento2 será o numero de linhas da matriz(x)
+					/*
+					 * exemplo : 4
+					 */
+					// o complemento3 será o numero de colunas da matriz(y)
+					/*
+					 * exemplo : 5
+					 */
+					
+					//adiciona as salas ao comboBox
+					Texto recebido_salas_pessoas = (Texto) entrada_dados.readObject();
+					
+					if (recebido_salas_pessoas.getTipo().equals("lista_salas_destinatarios"))
+					{
+						recebido = new String[(int) recebido_salas_pessoas.getComplemento2()]
+								[(int) recebido_salas_pessoas.getComplemento3()];
+						
+						recebido = (String[][])recebido_salas_pessoas.getComplemento1();
+						
+						for(int i = 0; recebido[i][0] != null; i++)
+						{
+							cbxSalas.addItem(recebido[i][0]);
+						}
+						
+					}
+					//cbxSalas.add(recebido_salas)
+                                        //cbxPessoas.add(recebido_pessoas)
+					
+					txtMensagem.setEnabled(true);
+					cbxSalas.setEnabled(true);
+					btnEnviar.setEnabled(true);
+					receber_mensagens();
+				}
+				catch(Exception erro)
+				{
+					JOptionPane.showMessageDialog(null, "Erro de conexão. Verifique o Ip/porta e o servidor.--"+erro.getMessage(),
+							"Erro de conexão", JOptionPane.INFORMATION_MESSAGE);
+					txtMensagem.setEnabled(false);
+					cbxSalas.setEnabled(false);
+					cbxDestinatarios.setEnabled(false);
+					btnEnviar.setEnabled(false);
+					return;
+				}
+				
+				
+				
+			}
+		});
+		
+	
+	cbxSalas.addActionListener (new ActionListener () {
+	    public void actionPerformed(ActionEvent e) 
+	    {
+	    	cbxDestinatarios.removeAllItems();
+	    	cbxDestinatarios.addItem("TODOS");
+	        
+	        for(int i=0;recebido[cbxSalas.getSelectedIndex()][i] != null ;i++)
+	        {
+	        	cbxDestinatarios.addItem(recebido[cbxSalas.getSelectedIndex()][i]);
+	        }
+	        cbxDestinatarios.setSelectedItem("TODOS");
+	        
+	        try
+	        {
+	        saida_dados = new ObjectOutputStream(conexao.getOutputStream());
+			
+			//mando pro servidor a sala solicitada
+			saida_dados.flush();
+			Texto info_usuario_sala = new Texto("sala_solicitada",cbxSalas.getSelectedItem().toString());
+			saida_dados.writeObject(info_usuario_sala);
+			saida_dados.flush();
+			saida_dados.close();
+			
+			txaMensagens.append("Sala trocada");
+	        }
+	        catch (Exception erro)
+	        {
+	        	JOptionPane.showMessageDialog(null, "Erro.--"+erro.getMessage(),
+						"Erro", JOptionPane.INFORMATION_MESSAGE);
+	        }	        
+	    }
+	});}
+	
+	private void receber_mensagens() throws IOException, ClassNotFoundException
+	{
+		entrada_dados = new ObjectInputStream(conexao.getInputStream());
+		Texto recebido = (Texto) entrada_dados.readObject();
+		
+		while(recebido.getTipo().equals("mensagem"))
+		{
+			//complemento1 vai ser o remetente
+			//complemento2 vai ser a mensagem
+			txaMensagens.append((String) recebido.getComplemento1() + 
+					(String) recebido.getComplemento2());
+			recebido = (Texto) entrada_dados.readObject();
+		}
+			txaMensagens.append("Comunicação encerrada");
+			entrada_dados.close();
 		
 	}
 }
