@@ -33,13 +33,13 @@ import javax.swing.SwingConstants;
 
 //import Janela.JanelaCliente;
 
-public class Cliente extends javax.swing.JFrame{
+public class Cliente extends javax.swing.JFrame implements Runnable{
 
 	private JFrame frame;
 	private JLabel lblMensagem;
 	private JComboBox cbxSalas;
 	private static JTextField txtNick;
-	static Socket conexao;
+	private static Socket conexao;
 	private JTextField txtMensagem ;
 	private ObjectOutputStream saida_dados;
 	private ObjectInputStream entrada_dados;
@@ -48,8 +48,8 @@ public class Cliente extends javax.swing.JFrame{
 	private JTextArea txaMensagens;
 	private JTextField txtIp;
 	private JTextField txtPorta;
+	private JButton btnEnviar;
 	private String[] listaSalas;
-	private boolean controle = false;
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -78,9 +78,10 @@ public class Cliente extends javax.swing.JFrame{
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
+		frame = 
+				new JFrame();
 		frame.setResizable(false);
-		frame.setBounds(100, 100, 675, 369);
+		frame.setBounds(100, 100, 760, 369);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -94,13 +95,6 @@ public class Cliente extends javax.swing.JFrame{
 		panel.add(txtIp);
 		txtIp.setColumns(10);
 		
-		JLabel lblNewLabel_1 = new JLabel("Porta servidor");
-		panel.add(lblNewLabel_1);
-		
-		txtPorta = new JTextField();
-		panel.add(txtPorta);
-		txtPorta.setColumns(10);
-		
 		JLabel lblNick = new JLabel("Nick");
 		panel.add(lblNick);
 		
@@ -113,8 +107,8 @@ public class Cliente extends javax.swing.JFrame{
 		panel.add(lbSalas);
 		
 		cbxSalas = new JComboBox();
+		cbxSalas.setModel(new DefaultComboBoxModel(new String[] {"", "Dinalva", "Claudio", "Lapa"}));
 		panel.add(cbxSalas);
-		cbxSalas.setEnabled(false);
 		cbxSalas.setMaximumRowCount(9);
 		
 		JButton btnConectar = new JButton("Conectar");
@@ -123,7 +117,7 @@ public class Cliente extends javax.swing.JFrame{
 		{
 		public void actionPerformed(ActionEvent arg0) 
 		{							
-			if (txtIp.getText().equals("") || txtPorta.getText().equals("") || txtNick.getText().equals(""))
+			if (txtIp.getText().equals("") || txtNick.getText().equals("") || cbxSalas.getSelectedItem().equals(""))
 			{
 				JOptionPane.showMessageDialog(null, "Preencha todos os campos", "Alerta", JOptionPane.INFORMATION_MESSAGE);
 				return;
@@ -131,41 +125,26 @@ public class Cliente extends javax.swing.JFrame{
 			
 			txaMensagens.setText("");//limpa as mensagens caso o usuário vá entrar em outro servidor
 			
-			try 
-			{
-				conexao = new Socket (txtIp.getText(), Integer.parseInt(txtPorta.getText()));
-				txaMensagens.setText("Conectado. Selecione uma sala");
-				//cbxSalas.removeAllItems();
-									
-				entrada_dados = new ObjectInputStream(conexao.getInputStream());
-				saida_dados   = new ObjectOutputStream(conexao.getOutputStream());	
-				
-				/*Texto Lista_salas = (Texto) entrada_dados.readObject();
-				
-				if (Lista_salas.getTipo().equals("Lista_De_Salas"))
-				{
-					listaSalas = (String[]) Lista_salas.getComp1();
-					
-					for(int i = 0; i < listaSalas.length; i++)
-					{
-						cbxSalas.addItem(listaSalas[i]);
-					}
-					//btnSelecionarSala.setEnabled(true);					
-				}
-				
-				cbxSalas.setEnabled(true);
-				String[] lista_destinatarios = (String[])entrada_dados.readObject(); //esta rebendo os nicks de tal
-				
-				for(int i = 0; i <= lista_destinatarios.length-1; i++)
-				{
-					cbxDestinatarios.addItem(lista_destinatarios[i]); 
-				}*/
-				cbxDestinatarios.setEnabled(true);
+			try {				
+				conexao = new Socket(txtIp.getText().toString(),12345); //conectou com o servidor		
+				saida_dados = new ObjectOutputStream(conexao.getOutputStream());
+				entrada_dados = new ObjectInputStream(conexao.getInputStream());	
 				txtMensagem.setEnabled(true);
-				btnEnviar.setEnabled(true);
-	
+				btnEnviar.setEnabled(true);				
+				saida_dados.writeObject(new Texto("info_usuario",txtNick.getText().toString(),cbxSalas.getSelectedItem().toString(),null,null));
 				
+				Texto msgRecebida = (Texto)entrada_dados.readObject();
+				
+				if(msgRecebida.getTipo().equals("nicks"))
+				{					
+					String[] nicks = (String[])msgRecebida.getComplemento1();
+					for(int i = 0; i <= nicks.length-1; i++){
+						cbxDestinatarios.addItem(nicks[i]);
+					}
+				}
+				cbxDestinatarios.setEnabled(true);									
 			}
+			
 			catch(Exception erro)
 			{
 				JOptionPane.showMessageDialog(null, "Erro de conexão. Verifique o Ip/porta e o servidor.--"+erro.getMessage(),
@@ -177,40 +156,25 @@ public class Cliente extends javax.swing.JFrame{
 				erro.printStackTrace();
 				return;
 			}				
-
+	
 		}
 		
-	});				
-		
-	cbxSalas.addActionListener (new ActionListener () {
-
-		public void actionPerformed(ActionEvent e) 
-	    {	        
-	        try
-	        {
-	        	if (controle == true)
-	        	{
-				//mando pro servidor a sala solicitada
-				saida_dados.writeObject(new Texto("info_usuario",txtNick.getText(),cbxSalas.getSelectedItem().toString(), null, null));
-				//ele me manda os usuários daquela sala para a escolha
-				cbxSalas.setEnabled(false);
-				txaMensagens.setEnabled(true);
-	        	}
-	        	else
-	        	{
-	        		controle = true;
-	        	}
-				
-				//txaMensagens.append("Sala trocada");
-	        }
-	        catch (Exception erro)
-	        {
-	        	JOptionPane.showMessageDialog(null, "Erro.--"+erro.getMessage(),
-						"Erro", JOptionPane.INFORMATION_MESSAGE);
-	        }	        
-	    }
-	    
-	}); 
+	});	
+		btnEnviar.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent arg0) {				
+			try 
+			{
+				//Validacoessss						
+				saida_dados.writeObject(new Texto("MSG", txtNick.getText(),cbxDestinatarios.getSelectedItem().toString(),txtMensagem.getText().toString(),null));													
+			}
+			catch(Exception erro)
+			{
+				txaMensagens.append("Erro:"+erro.getMessage());	
+			}
+		}
+			
+		});	
+		 
 		
 		JPanel panel_1 = new JPanel();
 		frame.getContentPane().add(panel_1, BorderLayout.SOUTH);
@@ -232,41 +196,8 @@ public class Cliente extends javax.swing.JFrame{
 		cbxDestinatarios.setMaximumRowCount(9);
 		panel_1.add(cbxDestinatarios);
 		
-		JButton btnEnviar = new JButton("Enviar");
-		btnEnviar.setEnabled(false);
-		btnEnviar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-		
-				try 
-				{	
-					/*VALIDACOESSSSS
-					 * if(txtMensagem.equals(""))
-						txaMensagens.append("Mensagem invalida");
-						*/
-						
-					//saida_dados = new ObjectOutputStream(conexao.getOutputStream());
-					//mando pro servidor a mensagem, mas antes escolho qual a sala
-					//saida_dados.flush();
-					Texto mensagem_enviada = new Texto("MSG",txtNick.getText().toString(),cbxDestinatarios.getSelectedItem().toString(),txtMensagem.getText(),null);
-					saida_dados.writeObject(mensagem_enviada);
-					
-					Texto txt = (Texto)entrada_dados.readObject();
-					if(txt.getTipo().equals("msg"))
-						System.out.println("Recebido do servidor.");
-					else
-						System.out.println(":////");
-					//saida_dados.flush();
-					//saida_dados.close();
-					
-					txaMensagens.setText("para "+ cbxDestinatarios.getSelectedItem().toString() + " : " + txtMensagem.getText());					
-				}
-				catch(Exception erro)
-				{
-					txaMensagens.append("Erro:"+erro.getMessage());	
-				}
-			}
-			
-		});
+		btnEnviar = new JButton("Enviar");
+		btnEnviar.setEnabled(false);		
 		panel_1.add(btnEnviar);
 		
 		JPanel panel_2 = new JPanel();
@@ -288,22 +219,25 @@ public class Cliente extends javax.swing.JFrame{
 		txaMensagens.setBackground(SystemColor.window);
 		txaMensagens.setEnabled(false);
 		panel_2.add(txaMensagens, BorderLayout.CENTER);}
-	
-	private void receber_mensagens() throws IOException, ClassNotFoundException
-	{
-		entrada_dados = new ObjectInputStream(conexao.getInputStream());
-		Texto recebido = (Texto) entrada_dados.readObject();
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		try {
+			for(;;) 
+			{
+				Texto recebido = (Texto)entrada_dados.readObject();						
+				if(recebido.getTipo().equals("LALA")) {
+					txaMensagens.setText("Unicornio");
+					txaMensagens.append((String) recebido.getComplemento1() + 
+										(String) recebido.getComplemento2());
+				}
+			}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		
-		while(recebido.getTipo().equals("mensagem"))
-		{
-			//complemento1 vai ser o remetente
-			//complemento2 vai ser a mensagem
-			txaMensagens.append((String) recebido.getComplemento1() + 
-					(String) recebido.getComplemento2());
-			recebido = (Texto) entrada_dados.readObject();
-		}
-		txaMensagens.append("Comunicação encerrada");
-		entrada_dados.close();		
 	}
 }
 		

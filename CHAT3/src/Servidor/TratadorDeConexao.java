@@ -21,13 +21,13 @@ public class TratadorDeConexao extends Thread
 
     public void run ()
     {
-        while (fim == false)
+        while (this.fim == false)
         {
           try {
         	  
-        	  String[] nicksAtuais =  this.sala.getNicks(); //pega os nicks das pessoas daquela determinada sala
+        	/*  String[] nicksAtuais =  this.sala.getNicks(); 			//pega os nicks das pessoas daquela determinada sala
       	   	  String[] entrou      =  new String[nicksAtuais.length-1]; //tera um a menos que nicksAtuais, pois tirarei 1 do vetor
-      	   															//Que no caso e o this.nick que sera retirado   
+      	   																//Que no caso e o this.nick que sera retirado   
                  
            for(int i = 0; i < nicksAtuais.length-1; i++)
       	   {
@@ -43,11 +43,9 @@ public class TratadorDeConexao extends Thread
            // para cada string s da lista saiu
            // this.usuario.envia("-") e this.usuario.envia(s)
       	   
-      	   for(int i = 0; i <= entrou.length-1; i++) {      	   
-      		  this.usuario.envia(entrou[i]+" entrou.");
-      		  if(i == entrou.length-1)
-      			this.usuario.envia("Fimm");   
-      	   }
+      	  for(int i = 0; i <= entrou.length-1; i++) {      	   
+      		  this.usuario.envia(new Texto("entrou",entrou[i]));      		     
+      	   }*/
      
       	   // receber de this.usuario 1 comando do protocolo
            // com complementos (pode ser "SAI", se usuario quer
@@ -58,29 +56,23 @@ public class TratadorDeConexao extends Thread
       		  
 	      	   texto =(Texto)this.usuario.receptor.readObject(); //ler o que veio do usuario
 	      	  
-	      	   if(texto.getTipo().equals("MSG")) {
-		           if (texto.getComplemento2().equals("TODOS")) { //comp3 e o destinatario
+	      	   if(texto.getTipo().equals("MSG")){
+		           /*if (texto.getComplemento2().equals("TODOS")) 
+		           { //comp3 e o destinatario
 		               // loop para mandar para cada nick i em nicksAtuais
 		        	   for(int i = 0; i <= nicksAtuais.length-1; i++){
 			               Usuario usr = this.sala.getUsuario (nicksAtuais[i]);
-			               usr.envia("msg"); // as letras M, S e G
-			               usr.envia("Remetente:"+texto.getComplemento2()); //comp2 de texto e o remetente
+			               usr.envia(new Texto("msg",null)); // as letras M, S e G
+			               usr.envia(texto.getComplemento2()); //comp2 de texto e o remetente
 			               usr.envia(texto.getComplemento3()); //comp4 e o texto
 		        	   }
-		           }
-		           
-		           else {
-		        	   System.out.println("Foi1");
-		               Usuario usr = this.sala.getUsuario((String)texto.getComplemento2());
-		               System.out.println("Foi2");
-		               usr.envia("msg"); // as letras M, S e G
-		               usr.envia("Remetente:"+texto.getComplemento1());
-		               System.out.println("Foi3");
-		               usr.envia(texto.getComplemento3());
-		               System.out.println("Foi4");
-		               //pare();
-		          }
-	      	  }
+		           }		           
+		           else 
+		           {*/		        	
+		               Usuario usr = this.sala.getUsuario((String)texto.getComplemento2());		        
+		               usr.envia(new Texto("LALA",texto.getComplemento1(),texto.getComplemento3(),null,null)); // as letras M, S e G        		              
+		           //}
+		      }
 	      	  else
       		  if(texto.getComplemento1().equals("SAI"))
       		  {
@@ -109,9 +101,11 @@ public class TratadorDeConexao extends Thread
 	        this.sala.entra(this.usuario);    
 	        this.nick = this.usuario.getNick();	
 	        //mandar para a janela cliente os nicks dos usuarios da sala
-	        this.usuario.envia(this.sala.getNicks());
+	        this.usuario.envia(new Texto("nicks",this.sala.getNicks()));	        
     	}
     	catch(Exception e)
-    	{e.printStackTrace();}
+    	{
+    		e.printStackTrace();
+    	}
     }
 }
