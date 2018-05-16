@@ -55,26 +55,29 @@ public class TratadorDeConexao extends Thread
            // (destinatario pode ser 1 especifico ou TODOS) e      	 
       		  
 	      	   texto =(Texto)this.usuario.receptor.readObject(); //ler o que veio do usuario
+	      	   
+	      	   //if(texto.getTipo().equals("entrou"))
+	      	   
 	      	  
-	      	   if(texto.getTipo().equals("MSG")){
-		           /*if (texto.getComplemento2().equals("TODOS")) 
+	      	   if(texto.getTipo().equals("msg"))
+	      	   {
+		           if (texto.getComplemento2().equals("Todos")) 
 		           { //comp3 e o destinatario
 		               // loop para mandar para cada nick i em nicksAtuais
+		        	   String[] nicksAtuais = this.sala.getNicks();
 		        	   for(int i = 0; i <= nicksAtuais.length-1; i++){
 			               Usuario usr = this.sala.getUsuario (nicksAtuais[i]);
-			               usr.envia(new Texto("msg",null)); // as letras M, S e G
-			               usr.envia(texto.getComplemento2()); //comp2 de texto e o remetente
-			               usr.envia(texto.getComplemento3()); //comp4 e o texto
+			               usr.envia(new Texto("msg",texto.getComplemento1(),texto.getComplemento3(),null,null));
 		        	   }
 		           }		           
 		           else 
-		           {*/		        	
+		           {		        	
 		               Usuario usr = this.sala.getUsuario((String)texto.getComplemento2());		        
-		               usr.envia(new Texto("LALA",texto.getComplemento1(),texto.getComplemento3(),null,null)); // as letras M, S e G        		              
-		           //}
+		               usr.envia(new Texto("msg",texto.getComplemento1(),texto.getComplemento3(),null,null)); // as letras M, S e G        		              
+		           }
 		      }
 	      	  else
-      		  if(texto.getComplemento1().equals("SAI"))
+      		  if(texto.getTipo().equals("sair"))
       		  {
       			  //ele mandou sai, ai paramos a thread e tiramos da sala
       			  this.sala.excluirUsuario(this.usuario);
@@ -100,8 +103,15 @@ public class TratadorDeConexao extends Thread
 	        this.sala       = salas.getSala(nomeSala);
 	        this.sala.entra(this.usuario);    
 	        this.nick = this.usuario.getNick();	
-	        //mandar para a janela cliente os nicks dos usuarios da sala
-	        this.usuario.envia(new Texto("nicks",this.sala.getNicks()));	        
+	        
+	        //mandar para todos clientes os nicks dos usuarios da sala;
+	        
+	        String[] nicksAtuais = this.sala.getNicks();
+     	    for(int i = 0; i <= nicksAtuais.length-1; i++)
+     	    {
+	               Usuario usr = this.sala.getUsuario (nicksAtuais[i]);
+	               usr.envia(new Texto("nicks",this.sala.getNicks(),this.nick,null,null));
+     	    }
     	}
     	catch(Exception e)
     	{

@@ -12,7 +12,7 @@ public class Servidor
 	        Salas        salas  = new Salas ();
 	        salas.novaSala("Dinalva");
 	        salas.novaSala("Claudio");
-	        salas.novaSala("Lapaa");
+	        salas.novaSala("Lapa");
 	        ServerSocket pedido = new ServerSocket (12345);
 	
 	        System.out.println ("Servidor operante...");

@@ -30,6 +30,8 @@ import javax.swing.JOptionPane;
 
 import Servidor.Texto;
 import javax.swing.SwingConstants;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 //import Janela.JanelaCliente;
 
@@ -80,6 +82,15 @@ public class Cliente extends javax.swing.JFrame implements Runnable{
 	private void initialize() {
 		frame = 
 				new JFrame();
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent arg0) 
+			{
+				saida_dados.writeObject(new Texto("sair",null));
+				saida_dados.close();
+				System.exit(n);
+			}
+		});
 		frame.setResizable(false);
 		frame.setBounds(100, 100, 760, 369);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -116,7 +127,9 @@ public class Cliente extends javax.swing.JFrame implements Runnable{
 		btnConectar.addActionListener(new ActionListener() 
 		{
 		public void actionPerformed(ActionEvent arg0) 
-		{							
+		{	
+			txtIp.setText("localhost");
+			
 			if (txtIp.getText().equals("") || txtNick.getText().equals("") || cbxSalas.getSelectedItem().equals(""))
 			{
 				JOptionPane.showMessageDialog(null, "Preencha todos os campos", "Alerta", JOptionPane.INFORMATION_MESSAGE);
@@ -136,13 +149,19 @@ public class Cliente extends javax.swing.JFrame implements Runnable{
 				Texto msgRecebida = (Texto)entrada_dados.readObject();
 				
 				if(msgRecebida.getTipo().equals("nicks"))
-				{					
+				{
+					cbxDestinatarios.addItem("Todos");
 					String[] nicks = (String[])msgRecebida.getComplemento1();
 					for(int i = 0; i <= nicks.length-1; i++){
 						cbxDestinatarios.addItem(nicks[i]);
 					}
 				}
-				cbxDestinatarios.setEnabled(true);									
+				cbxSalas.setEnabled(false);
+				txtIp.setEnabled(false);
+				txtNick.setEnabled(false);
+				btnConectar.setEnabled(false);
+				cbxDestinatarios.setEnabled(true);			
+				thread2.start();
 			}
 			
 			catch(Exception erro)
@@ -160,20 +179,6 @@ public class Cliente extends javax.swing.JFrame implements Runnable{
 		}
 		
 	});	
-		btnEnviar.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent arg0) {				
-			try 
-			{
-				//Validacoessss						
-				saida_dados.writeObject(new Texto("MSG", txtNick.getText(),cbxDestinatarios.getSelectedItem().toString(),txtMensagem.getText().toString(),null));													
-			}
-			catch(Exception erro)
-			{
-				txaMensagens.append("Erro:"+erro.getMessage());	
-			}
-		}
-			
-		});	
 		 
 		
 		JPanel panel_1 = new JPanel();
@@ -197,6 +202,19 @@ public class Cliente extends javax.swing.JFrame implements Runnable{
 		panel_1.add(cbxDestinatarios);
 		
 		btnEnviar = new JButton("Enviar");
+		btnEnviar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try 
+				{
+					//Validacoessss						
+					saida_dados.writeObject(new Texto("msg", txtNick.getText(),cbxDestinatarios.getSelectedItem().toString(),txtMensagem.getText().toString(),null));													
+				}
+				catch(Exception erro)
+				{
+					txaMensagens.append("Erro:"+erro.getMessage());	
+				}
+			}
+		});
 		btnEnviar.setEnabled(false);		
 		panel_1.add(btnEnviar);
 		
@@ -220,23 +238,42 @@ public class Cliente extends javax.swing.JFrame implements Runnable{
 		txaMensagens.setEnabled(false);
 		panel_2.add(txaMensagens, BorderLayout.CENTER);}
 
-	@Override
+	Thread thread2 = new Thread () {
 	public void run() {
 		// TODO Auto-generated method stub
 		try {
 			for(;;) 
 			{
 				Texto recebido = (Texto)entrada_dados.readObject();						
-				if(recebido.getTipo().equals("LALA")) {
-					txaMensagens.setText("Unicornio");
-					txaMensagens.append((String) recebido.getComplemento1() + 
-										(String) recebido.getComplemento2());
+				if(recebido.getTipo().equals("msg")) 
+				{
+					txaMensagens.append((String) recebido.getComplemento1() + " : " 
+				    +(String) recebido.getComplemento2() + "\n") ;
+				}
+				else if(recebido.getTipo().equals("nicks"))
+				{					
+					String[] nicks = (String[])recebido.getComplemento1();
+					cbxDestinatarios.removeAllItems();
+					cbxDestinatarios.addItem("Todos");
+					for(int i = 0; i <= nicks.length-1; i++)
+					{
+						cbxDestinatarios.addItem(nicks[i]);
+					}
+					
+					txaMensagens.append("O usuário " + (String)recebido.getComplemento2() + " entrou na sala \n");
 				}
 			}
 				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		
+	}
+	};
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
 		
 	}
 }
